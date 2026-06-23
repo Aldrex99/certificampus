@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-/* ----------------------------- Schools ----------------------------- */
 export const createSchoolSchema = z.object({
   body: z.object({
     label: z.string().min(1, "Nom de l'établissement requis"),
@@ -21,7 +20,6 @@ export const updateSchoolSchema = z.object({
   }),
 });
 
-/* -------------------------- Subscriptions -------------------------- */
 export const createSubscriptionSchema = z.object({
   body: z.object({
     name: z.string().min(1),
@@ -46,7 +44,6 @@ export const updateSubscriptionSchema = z.object({
   }),
 });
 
-/* ---------------------------- Templates ---------------------------- */
 export const createTemplateSchema = z.object({
   body: z.object({
     name: z.string().min(1),
