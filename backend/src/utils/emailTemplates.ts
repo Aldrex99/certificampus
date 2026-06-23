@@ -59,3 +59,16 @@ export function resetPasswordEmail(
     ),
   };
 }
+
+export function accountUpdatedEmail(name: string): {
+  subject: string;
+  html: string;
+} {
+  return {
+    subject: "Vos informations ont été mises à jour",
+    html: layout(
+      "Mise à jour réussie",
+      `<p>Bonjour ${name},</p><p>Les informations de votre compte CertifiCampus ont bien été mises à jour.</p>`,
+    ),
+  };
+}
