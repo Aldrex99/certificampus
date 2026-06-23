@@ -6,6 +6,7 @@ import trainingRoutes from "./training.routes";
 import studentRoutes from "./student.routes";
 import certificationRoutes from "./certification.routes";
 import verifyRoutes from "./verify.routes";
+import dashboardRoutes from "./dashboard.routes";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/trainings", trainingRoutes);
 router.use("/students", studentRoutes);
 router.use("/certifications", certificationRoutes);
 router.use("/verify", verifyRoutes);
+router.use("/dashboard", dashboardRoutes);
 
 export default router;
