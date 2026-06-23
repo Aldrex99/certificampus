@@ -60,6 +60,23 @@ export function resetPasswordEmail(
   };
 }
 
+export function diplomaEmail(
+  studentName: string,
+  schoolName: string,
+  verifyUrl: string,
+): { subject: string; html: string } {
+  return {
+    subject: `Votre certificat ${schoolName}`,
+    html: layout(
+      "Félicitations !",
+      `<p>Bonjour ${studentName},</p>
+       <p>Votre certificat délivré par <strong>${schoolName}</strong> est disponible en pièce jointe.</p>
+       <p>Son authenticité peut être vérifiée à tout moment via ce lien :</p>
+       <p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
+    ),
+  };
+}
+
 export function accountUpdatedEmail(name: string): {
   subject: string;
   html: string;
