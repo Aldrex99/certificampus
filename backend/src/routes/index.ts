@@ -3,6 +3,7 @@ import authRoutes from "./auth.routes";
 import adminRoutes from "./admin.routes";
 import settingsRoutes from "./settings.routes";
 import trainingRoutes from "./training.routes";
+import studentRoutes from "./student.routes";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use("/auth", authRoutes);
 router.use("/admin", adminRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/trainings", trainingRoutes);
+router.use("/students", studentRoutes);
 
 export default router;

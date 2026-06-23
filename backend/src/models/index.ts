@@ -4,3 +4,5 @@ export { Subscription, ISubscription } from "./Subscription";
 export { Diploma, IDiploma } from "./Diploma";
 export { TemplateDiploma, ITemplateDiploma } from "./TemplateDiploma";
 export { Training, ITraining } from "./Training";
+export { Student, IStudent } from "./Student";
+export { Speciality, ISpeciality } from "./Speciality";
