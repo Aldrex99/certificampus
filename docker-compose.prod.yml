@@ -4,7 +4,7 @@
 services:
   mongo:
     image: mongo:8
-    container_name: certificampus-mongo
+    container_name: certificampus-mongo-${STACK:-prod}
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
@@ -31,7 +31,7 @@ services:
 
   backend:
     image: ${REGISTRY:-ghcr.io/owner/certificampus}-backend:${IMAGE_TAG:-latest}
-    container_name: certificampus-backend
+    container_name: certificampus-backend-${STACK:-prod}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -63,7 +63,7 @@ services:
 
   frontend:
     image: ${REGISTRY:-ghcr.io/owner/certificampus}-frontend:${IMAGE_TAG:-latest}
-    container_name: certificampus-frontend
+    container_name: certificampus-frontend-${STACK:-prod}
     restart: unless-stopped
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-5003}:80"
