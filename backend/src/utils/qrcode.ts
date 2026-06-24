@@ -1,9 +1,9 @@
 import QRCode from 'qrcode';
 import { env } from '../config/env';
 
-/** Public URL a QR code points to for diploma verification. */
+/** Public URL a QR code points to: the frontend verification page. */
 export function verificationUrl(qrToken: string): string {
-  return `${env.publicUrl}/api/v1/verify/${qrToken}`;
+  return `${env.clientUrl}/verify/${qrToken}`;
 }
 
 /** Returns a PNG data-URL of the QR code for the given diploma token. */
