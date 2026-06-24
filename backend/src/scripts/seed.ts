@@ -73,9 +73,7 @@ const SCHOOL_TEMPLATE_CONTENT = `
 // Main seed function
 // ---------------------------------------------------------------------------
 
-async function seed(): Promise<void> {
-  await connectDatabase();
-
+export async function runSeed(): Promise<void> {
   // Clear all collections in dependency order
   await Promise.all([
     Diploma.deleteMany({}),
@@ -534,11 +532,24 @@ async function seed(): Promise<void> {
   console.log("  marie.dupont@ecole-tech.fr / School1234! (role: school)");
   console.log("  jp.renard@business-school.fr / School1234! (role: school)");
   console.log("  f.ouali@sante-formation.fr  / School1234! (role: school)");
-
-  await disconnectDatabase();
 }
 
-seed().catch((err) => {
-  console.error("[seed] Erreur :", err);
-  disconnectDatabase().finally(() => process.exit(1));
-});
+export async function seedIfEmpty(): Promise<void> {
+  const userCount = await User.estimatedDocumentCount();
+  if (userCount > 0) {
+    console.log("[seed] Base déjà peuplée, seed ignoré");
+    return;
+  }
+  console.log("[seed] Base vide détectée, exécution du seed initial…");
+  await runSeed();
+}
+
+if (require.main === module) {
+  connectDatabase()
+    .then(runSeed)
+    .then(() => disconnectDatabase())
+    .catch((err) => {
+      console.error("[seed] Erreur :", err);
+      disconnectDatabase().finally(() => process.exit(1));
+    });
+}

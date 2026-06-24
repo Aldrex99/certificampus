@@ -17,6 +17,7 @@ export const env = {
   isProd: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",
   port: Number(process.env.PORT ?? 4000),
+  seedOnStart: process.env.SEED_ON_START !== "false",
   clientUrl: process.env.CLIENT_URL ?? "http://localhost:5173",
   publicUrl: process.env.PUBLIC_URL ?? "http://localhost:4000",
 
