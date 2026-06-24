@@ -1,6 +1,8 @@
+# Puppeteer uses the system Chromium (Alpine), not its bundled one.
 # ---- Build stage ----
 FROM node:20-alpine AS build
 WORKDIR /app
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -12,6 +14,7 @@ RUN npm run build
 # ---- Production dependencies ----
 FROM node:20-alpine AS deps
 WORKDIR /app
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
@@ -20,8 +23,17 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Tools for the container healthcheck.
-RUN apk add --no-cache wget
+# System Chromium for Puppeteer + tools for the healthcheck.
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      wget
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 COPY package.json ./
 COPY --from=deps /app/node_modules ./node_modules
