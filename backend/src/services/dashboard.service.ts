@@ -56,12 +56,12 @@ export async function getSchoolDashboard(
       const [total, yearAdmis] = await Promise.all([
         Student.countDocuments({
           school,
-          createdAt: { $gte: start, $lt: end },
+          graduationDate: { $gte: start, $lt: end },
         }),
         Student.countDocuments({
           school,
           status: "admis",
-          createdAt: { $gte: start, $lt: end },
+          graduationDate: { $gte: start, $lt: end },
         }),
       ]);
       return {

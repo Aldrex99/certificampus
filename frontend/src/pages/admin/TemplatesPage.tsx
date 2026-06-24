@@ -14,11 +14,11 @@ import { TemplateDiploma } from '@/types';
 
 const DEFAULT_CONTENT = `<section style="text-align:center;padding:24px;border:4px double #0b1e3f">
   <h1>Certificat de Réussite</h1>
-  <p>{{schoolName}}</p>
-  <h2>{{studentName}}</h2>
-  <p>Formation : {{trainingLabel}}</p>
-  <p>Mention : {{grade}} — {{graduationDate}}</p>
-  <div>{{qrcode}}</div>
+  <p>{{school_label}}</p>
+  <h2>{{student_name}}</h2>
+  <p>Formation : {{training_label}}</p>
+  <p>Mention : {{grade}} — {{graduation_date}}</p>
+  <div><img src="{{qr_code_url}}" alt="QR code" width="160" height="160" /></div>
 </section>`;
 
 export default function TemplatesPage() {
@@ -56,11 +56,12 @@ export default function TemplatesPage() {
   const preview = (content: string) => {
     setPreviewHtml(
       content
-        .replace(/{{studentName}}/g, 'Jeanne Dupont')
-        .replace(/{{schoolName}}/g, 'École Démo')
-        .replace(/{{trainingLabel}}/g, 'Master Dev Web')
+        .replace(/{{student_name}}/g, 'Jeanne Dupont')
+        .replace(/{{school_label}}/g, 'École Démo')
+        .replace(/{{training_label}}/g, 'Master Dev Web')
+        .replace(/{{speciality_label}}/g, 'Développement Web')
         .replace(/{{grade}}/g, 'Très Bien')
-        .replace(/{{graduationDate}}/g, '30/06/2026')
+        .replace(/{{graduation_date}}/g, '30/06/2026')
         .replace(/{{[\w]+}}/g, '')
     );
     setPreviewOpen(true);
@@ -125,7 +126,7 @@ export default function TemplatesPage() {
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
           <div className="space-y-1.5">
-            <Label>Contenu HTML (placeholders : {'{{studentName}}, {{schoolName}}, {{trainingLabel}}, {{grade}}, {{graduationDate}}, {{qrcode}}'})</Label>
+            <Label>Contenu HTML (placeholders : {'{{student_name}}, {{school_label}}, {{training_label}}, {{speciality_label}}, {{grade}}, {{graduation_date}}, {{qr_code_url}}'})</Label>
             <textarea
               className="flex min-h-[200px] w-full rounded-md border border-input bg-white px-3 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               value={form.content}

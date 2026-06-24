@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { store } from "./store";
 import { logout } from "./store/authSlice";
+import { api } from "./store/api";
 import { setOnAuthFailure } from "./lib/axios";
 import App from "./App";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,6 +14,8 @@ import "./index.css";
 // When a token refresh fails, drop the local session and send the user to login.
 setOnAuthFailure(() => {
   store.dispatch(logout());
+  // Drop every cached query so a re-login never shows the previous user's data.
+  store.dispatch(api.util.resetApiState());
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
   }

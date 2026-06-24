@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { logout } from "@/store/authSlice";
-import { useLogoutMutation } from "@/store/api";
+import { api, useLogoutMutation } from "@/store/api";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +52,7 @@ export function DashboardLayout({ variant }: { variant: "school" | "admin" }) {
       // ignore — we log out locally regardless
     }
     dispatch(logout());
+    dispatch(api.util.resetApiState());
     navigate("/login");
   };
 
