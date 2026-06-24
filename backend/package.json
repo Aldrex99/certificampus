@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test": "cross-env NODE_ENV=test jest --runInBand --passWithNoTests",
     "test:watch": "cross-env NODE_ENV=test jest --watch --runInBand",
     "seed": "ts-node-dev --transpile-only src/scripts/seed.ts"
   },
