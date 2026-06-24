@@ -108,6 +108,7 @@ jobs:
           cat > .env <<EOF
           REGISTRY=${{ env.REGISTRY }}/${{ steps.img.outputs.prefix }}
           IMAGE_TAG=${{ github.sha }}
+          STACK=${{ github.ref_name }}
           FRONTEND_PORT=${{ vars.FRONTEND_PORT }}
           BACKEND_PORT=${{ vars.BACKEND_PORT }}
 
