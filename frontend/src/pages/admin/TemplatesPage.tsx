@@ -3,7 +3,7 @@ import { Plus, Trash2, Pencil, Eye } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
-import { Table, Th, Td, Badge, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
 import {
   useGetTemplatesQuery,
   useCreateTemplateMutation,
@@ -11,7 +11,6 @@ import {
   useDeleteTemplateMutation,
 } from '@/store/api';
 import { TemplateDiploma } from '@/types';
-import { apiError } from '@/lib/errors';
 
 const DEFAULT_CONTENT = `<section style="text-align:center;padding:24px;border:4px double #0b1e3f">
   <h1>Certificat de Réussite</h1>
@@ -31,29 +30,26 @@ export default function TemplatesPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<TemplateDiploma | null>(null);
   const [form, setForm] = useState({ name: '', content: DEFAULT_CONTENT, isDefault: false });
-  const [error, setError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
 
   const items = templates ?? [];
 
-  const openCreate = () => { setEditing(null); setForm({ name: '', content: DEFAULT_CONTENT, isDefault: false }); setError(''); setOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: '', content: DEFAULT_CONTENT, isDefault: false }); setOpen(true); };
   const openEdit = (t: TemplateDiploma) => {
     setEditing(t);
     setForm({ name: t.name, content: t.content, isDefault: t.isDefault });
-    setError('');
     setOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
       if (editing) await updateTpl({ id: editing._id, body: form }).unwrap();
       else await createTpl(form).unwrap();
       setOpen(false);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
@@ -124,7 +120,6 @@ export default function TemplatesPage() {
         }
       >
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <Alert>{error}</Alert>}
           <div className="space-y-1.5">
             <Label>Nom</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />

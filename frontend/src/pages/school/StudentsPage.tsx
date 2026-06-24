@@ -3,7 +3,8 @@ import { Plus, Upload, Download, Trash2, Pencil } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Select } from '@/components/ui/input';
-import { Table, Th, Td, Badge, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
+import { toast } from 'react-toastify';
 import {
   useGetStudentsQuery,
   useCreateStudentMutation,
@@ -11,17 +12,23 @@ import {
   useDeleteStudentMutation,
   useBulkDeleteStudentsMutation,
   useImportStudentsMutation,
+  useGetTrainingsQuery,
 } from '@/store/api';
 import { Student } from '@/types';
-import { apiError } from '@/lib/errors';
 
-const empty = { firstname: '', lastname: '', email: '', status: 'ajourne', grade: '' };
+const empty = { firstname: '', lastname: '', email: '', status: 'ajourne', grade: '', training: '' };
+
+/** Reads a student's training id, whether populated or a raw id. */
+const trainingId = (t: Student['training']): string =>
+  typeof t === 'string' ? t : t?._id ?? '';
 
 export default function StudentsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [training, setTraining] = useState('');
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useGetStudentsQuery({ page, search, status });
+  const { data, isLoading } = useGetStudentsQuery({ page, search, status, training });
+  const { data: trainings } = useGetTrainingsQuery({});
 
   const [createStudent] = useCreateStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
@@ -33,8 +40,6 @@ export default function StudentsPage() {
   const [editing, setEditing] = useState<Student | null>(null);
   const [form, setForm] = useState<Record<string, string>>(empty);
   const [selected, setSelected] = useState<string[]>([]);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const items = data?.items ?? [];
@@ -43,40 +48,36 @@ export default function StudentsPage() {
   const openCreate = () => {
     setEditing(null);
     setForm(empty);
-    setError('');
     setModalOpen(true);
   };
   const openEdit = (s: Student) => {
     setEditing(s);
-    setForm({ firstname: s.firstname, lastname: s.lastname, email: s.email, status: s.status, grade: s.grade ?? '' });
-    setError('');
+    setForm({ firstname: s.firstname, lastname: s.lastname, email: s.email, status: s.status, grade: s.grade ?? '', training: trainingId(s.training) });
     setModalOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    const body = { ...form, training: form.training || null } as unknown as Partial<Student>;
     try {
-      if (editing) await updateStudent({ id: editing._id, body: form }).unwrap();
-      else await createStudent(form).unwrap();
+      if (editing) await updateStudent({ id: editing._id, body }).unwrap();
+      else await createStudent(body).unwrap();
       setModalOpen(false);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
   const onImport = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setNotice('');
-    setError('');
     const fd = new FormData();
     fd.append('file', file);
     try {
       const res = await importStudents(fd).unwrap();
-      setNotice(`Import terminé : ${res.created} créés, ${res.updated} mis à jour, ${res.skipped} ignorés.`);
-    } catch (err) {
-      setError(apiError(err));
+      toast.success(`Import terminé : ${res.created} créés, ${res.updated} mis à jour, ${res.skipped} ignorés.`);
+    } catch {
+      // Error toast handled globally by the toast middleware.
     } finally {
       if (fileRef.current) fileRef.current.value = '';
     }
@@ -118,9 +119,6 @@ export default function StudentsPage() {
         }
       />
 
-      {notice && <div className="mb-4"><Alert variant="success">{notice}</Alert></div>}
-      {error && <div className="mb-4"><Alert>{error}</Alert></div>}
-
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Input
           placeholder="Rechercher..."
@@ -132,6 +130,12 @@ export default function StudentsPage() {
           <option value="">Tous les statuts</option>
           <option value="admis">Admis</option>
           <option value="ajourne">Ajournés</option>
+        </Select>
+        <Select value={training} onChange={(e) => { setTraining(e.target.value); setPage(1); }} className="max-w-[200px]">
+          <option value="">Toutes les formations</option>
+          {trainings?.items.map((t) => (
+            <option key={t._id} value={t._id}>{t.label}</option>
+          ))}
         </Select>
         {selected.length > 0 && (
           <Button variant="destructive" onClick={onBulkDelete}>
@@ -151,6 +155,7 @@ export default function StudentsPage() {
               </Th>
               <Th>Nom</Th>
               <Th>Email</Th>
+              <Th>Formation</Th>
               <Th>Statut</Th>
               <Th>Mention</Th>
               <Th>Certifié</Th>
@@ -168,6 +173,7 @@ export default function StudentsPage() {
                   </Td>
                   <Td className="font-medium">{s.firstname} {s.lastname}</Td>
                   <Td className="text-muted-foreground">{s.email}</Td>
+                  <Td>{typeof s.training === 'object' ? s.training.label : '—'}</Td>
                   <Td>
                     <Badge variant={s.status === 'admis' ? 'success' : 'warning'}>
                       {s.status === 'admis' ? 'Admis' : 'Ajourné'}
@@ -211,7 +217,6 @@ export default function StudentsPage() {
         }
       >
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <Alert>{error}</Alert>}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Prénom</Label>
@@ -225,6 +230,15 @@ export default function StudentsPage() {
           <div className="space-y-1.5">
             <Label>Email</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Formation</Label>
+            <Select value={form.training} onChange={(e) => setForm({ ...form, training: e.target.value })}>
+              <option value="">Aucune formation</option>
+              {trainings?.items.map((t) => (
+                <option key={t._id} value={t._id}>{t.label}</option>
+              ))}
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">

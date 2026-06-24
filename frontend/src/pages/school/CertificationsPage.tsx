@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Award, Eye, Send, FileCheck } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Table, Th, Td, Badge, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
+import { toast } from 'react-toastify';
 import {
   useGetCertifiableQuery,
   useGenerateDiplomasMutation,
   usePublishDiplomasMutation,
   useLazyPreviewDiplomaQuery,
 } from '@/store/api';
-import { apiError } from '@/lib/errors';
 import { Diploma } from '@/types';
 
 export default function CertificationsPage() {
@@ -20,8 +20,6 @@ export default function CertificationsPage() {
 
   const [selected, setSelected] = useState<string[]>([]);
   const [generated, setGenerated] = useState<Diploma[]>([]);
-  const [notice, setNotice] = useState('');
-  const [error, setError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
 
@@ -30,38 +28,35 @@ export default function CertificationsPage() {
   const toggleAll = () => setSelected(selected.length === items.length ? [] : items.map((s) => s._id));
 
   const onPreview = async (studentId: string) => {
-    setError('');
     try {
       const res = await triggerPreview(studentId).unwrap();
       setPreviewHtml(res.html);
       setPreviewOpen(true);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
   const onGenerate = async () => {
     if (!selected.length) return;
-    setError(''); setNotice('');
     try {
       const res = await generate({ studentIds: selected }).unwrap();
       setGenerated(res.generated);
-      setNotice(`${res.generated.length} diplôme(s) généré(s).`);
+      toast.success(`${res.generated.length} diplôme(s) généré(s).`);
       setSelected([]);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
   const onPublish = async () => {
     if (!generated.length) return;
-    setError(''); setNotice('');
     try {
       const res = await publish({ diplomaIds: generated.map((d) => d._id), send: true }).unwrap();
-      setNotice(`${res.published} diplôme(s) publié(s), ${res.sent} envoyé(s) par e-mail.`);
+      toast.success(`${res.published} diplôme(s) publié(s), ${res.sent} envoyé(s) par e-mail.`);
       setGenerated([]);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
@@ -82,8 +77,6 @@ export default function CertificationsPage() {
         }
       />
 
-      {notice && <div className="mb-4"><Alert variant="success">{notice}</Alert></div>}
-      {error && <div className="mb-4"><Alert>{error}</Alert></div>}
       {generated.length > 0 && (
         <div className="mb-4 flex items-center gap-2 rounded-md border border-brand/20 bg-brand/5 px-4 py-3 text-sm">
           <FileCheck className="h-4 w-4 text-brand" />

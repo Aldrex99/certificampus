@@ -3,7 +3,7 @@ import { Plus, Trash2, Pencil } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Select } from '@/components/ui/input';
-import { Table, Th, Td, Badge, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
 import {
   useGetSubscriptionsQuery,
   useCreateSubscriptionMutation,
@@ -11,7 +11,6 @@ import {
   useDeleteSubscriptionMutation,
 } from '@/store/api';
 import { Subscription } from '@/types';
-import { apiError } from '@/lib/errors';
 
 const empty = { name: '', type: 'monthly', price: 0, status: 'pending' };
 const statusVariant: Record<string, 'success' | 'warning' | 'muted'> = {
@@ -30,28 +29,25 @@ export default function SubscriptionsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Subscription | null>(null);
   const [form, setForm] = useState<{ name: string; type: string; price: number; status: string }>(empty);
-  const [error, setError] = useState('');
 
   const items = data?.items ?? [];
 
-  const openCreate = () => { setEditing(null); setForm(empty); setError(''); setOpen(true); };
+  const openCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (s: Subscription) => {
     setEditing(s);
     setForm({ name: s.name, type: s.type, price: s.price, status: s.status });
-    setError('');
     setOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     const body = { ...form, price: Number(form.price) } as Partial<Subscription>;
     try {
       if (editing) await updateSub({ id: editing._id, body }).unwrap();
       else await createSub(body).unwrap();
       setOpen(false);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
@@ -111,7 +107,6 @@ export default function SubscriptionsPage() {
         }
       >
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <Alert>{error}</Alert>}
           <div className="space-y-1.5">
             <Label>Nom</Label>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />

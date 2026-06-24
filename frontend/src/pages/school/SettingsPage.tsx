@@ -3,13 +3,12 @@ import { PageHeader } from '@/components/ui/modal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
-import { Alert, Spinner } from '@/components/ui/misc';
+import { Spinner } from '@/components/ui/misc';
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
 } from '@/store/api';
-import { apiError } from '@/lib/errors';
 
 export default function SettingsPage() {
   const { data, isLoading } = useGetProfileQuery();
@@ -18,8 +17,6 @@ export default function SettingsPage() {
 
   const [profile, setProfile] = useState({ firstname: '', lastname: '', email: '', schoolName: '' });
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [profileMsg, setProfileMsg] = useState({ ok: '', err: '' });
-  const [pwMsg, setPwMsg] = useState({ ok: '', err: '' });
 
   useEffect(() => {
     if (data) {
@@ -34,24 +31,20 @@ export default function SettingsPage() {
 
   const onProfile = async (e: FormEvent) => {
     e.preventDefault();
-    setProfileMsg({ ok: '', err: '' });
     try {
       await updateProfile(profile).unwrap();
-      setProfileMsg({ ok: 'Informations mises à jour.', err: '' });
-    } catch (err) {
-      setProfileMsg({ ok: '', err: apiError(err) });
+    } catch {
+      // Feedback handled globally by the toast middleware.
     }
   };
 
   const onPassword = async (e: FormEvent) => {
     e.preventDefault();
-    setPwMsg({ ok: '', err: '' });
     try {
       await changePassword(pw).unwrap();
-      setPwMsg({ ok: 'Mot de passe modifié.', err: '' });
       setPw({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err) {
-      setPwMsg({ ok: '', err: apiError(err) });
+    } catch {
+      // Feedback handled globally by the toast middleware.
     }
   };
 
@@ -66,8 +59,6 @@ export default function SettingsPage() {
           <CardHeader><CardTitle>Informations</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={onProfile} className="space-y-4">
-              {profileMsg.err && <Alert>{profileMsg.err}</Alert>}
-              {profileMsg.ok && <Alert variant="success">{profileMsg.ok}</Alert>}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Prénom</Label>
@@ -97,8 +88,6 @@ export default function SettingsPage() {
           <CardHeader><CardTitle>Mot de passe</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={onPassword} className="space-y-4">
-              {pwMsg.err && <Alert>{pwMsg.err}</Alert>}
-              {pwMsg.ok && <Alert variant="success">{pwMsg.ok}</Alert>}
               <div className="space-y-1.5">
                 <Label>Mot de passe actuel</Label>
                 <Input type="password" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} required />

@@ -3,7 +3,7 @@ import { Plus, Trash2, Pencil } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
-import { Table, Th, Td, Badge, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
 import {
   useGetSchoolsQuery,
   useCreateSchoolMutation,
@@ -11,7 +11,6 @@ import {
   useDeleteSchoolMutation,
 } from '@/store/api';
 import { School } from '@/types';
-import { apiError } from '@/lib/errors';
 import { formatDate } from '@/lib/utils';
 
 const emptyCreate = { label: '', address: '', region: '', ownerFirstname: '', ownerLastname: '', ownerEmail: '' };
@@ -26,27 +25,24 @@ export default function SchoolsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<School | null>(null);
   const [form, setForm] = useState<Record<string, string>>(emptyCreate);
-  const [error, setError] = useState('');
 
   const items = data?.items ?? [];
 
-  const openCreate = () => { setEditing(null); setForm(emptyCreate); setError(''); setOpen(true); };
+  const openCreate = () => { setEditing(null); setForm(emptyCreate); setOpen(true); };
   const openEdit = (s: School) => {
     setEditing(s);
     setForm({ label: s.label, address: s.address ?? '', region: s.region ?? '' });
-    setError('');
     setOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
       if (editing) await updateSchool({ id: editing._id, body: form }).unwrap();
       else await createSchool(form).unwrap();
       setOpen(false);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
@@ -112,7 +108,6 @@ export default function SchoolsPage() {
         }
       >
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <Alert>{error}</Alert>}
           <div className="space-y-1.5">
             <Label>Nom de l'établissement</Label>
             <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
