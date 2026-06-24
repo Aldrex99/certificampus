@@ -22,7 +22,7 @@ export default function VerifyPage() {
   const [data, setData] = useState<VerifyResult | null>(null);
 
   useEffect(() => {
-    fetch(`/api/v1/verify/${token}?format=json`)
+    fetch(`/api/v1/verify/${token}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success && json.data?.valid) {

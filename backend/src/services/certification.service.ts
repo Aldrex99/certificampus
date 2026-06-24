@@ -1,4 +1,7 @@
+import fs from "fs";
+import path from "path";
 import { Types } from "mongoose";
+import { env } from "../config/env";
 import {
   Student,
   Diploma,
@@ -234,10 +237,24 @@ export async function publishDiplomas(
         school?.label ?? "votre établissement",
         verificationUrl(diploma.qrToken),
       );
+
+      // Attach the generated diploma PDF when it exists on disk.
+      const pdfPath = path.join(env.diplomaDir, `${diploma._id}.pdf`);
+      const attachments = fs.existsSync(pdfPath)
+        ? [
+            {
+              name: `diplome-${diploma._id}.pdf`,
+              type: "application/pdf",
+              path: pdfPath,
+            },
+          ]
+        : undefined;
+
       const res = await sendEmail({
         to: student.email,
         subject: mail.subject,
         html: mail.html,
+        attachments,
       });
       if (res.sent) {
         diploma.sentAt = new Date();
