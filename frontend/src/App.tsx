@@ -16,6 +16,11 @@ import SettingsPage from "./pages/school/SettingsPage";
 import SchoolDashboard from "./pages/school/SchoolDashboard";
 import CertificationsPage from "./pages/school/CertificationsPage";
 
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import SchoolsPage from "./pages/admin/SchoolsPage";
+import SubscriptionsPage from "./pages/admin/SubscriptionsPage";
+import TemplatesPage from "./pages/admin/TemplatesPage";
+
 export default function App() {
   return (
     <Routes>
@@ -36,6 +41,16 @@ export default function App() {
           <Route path="trainings" element={<TrainingsPage />} />
           <Route path="certifications" element={<CertificationsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+        </Route>
+      </Route>
+
+      {/* Admin */}
+      <Route element={<ProtectedRoute role="admin" />}>
+        <Route path="/admin" element={<DashboardLayout variant="admin" />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="schools" element={<SchoolsPage />} />
+          <Route path="subscriptions" element={<SubscriptionsPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
         </Route>
       </Route>
 
