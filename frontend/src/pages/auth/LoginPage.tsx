@@ -1,29 +1,31 @@
-import { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthLayout } from './AuthLayout';
-import { Button } from '@/components/ui/button';
-import { Input, Label } from '@/components/ui/input';
-import { Alert } from '@/components/ui/misc';
-import { useLoginMutation } from '@/store/api';
-import { useAppDispatch } from '@/store';
-import { setCredentials } from '@/store/authSlice';
-import { apiError } from '@/lib/errors';
+import { FormEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthLayout } from "./AuthLayout";
+import { Button } from "@/components/ui/button";
+import { Input, Label } from "@/components/ui/input";
+import { Alert } from "@/components/ui/misc";
+import { api, useLoginMutation } from "@/store/api";
+import { useAppDispatch } from "@/store";
+import { setCredentials } from "@/store/authSlice";
+import { apiError } from "@/lib/errors";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [login, { isLoading }] = useLoginMutation();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       const res = await login({ email, password }).unwrap();
+
+      dispatch(api.util.resetApiState());
       dispatch(setCredentials(res));
-      navigate(res.user.role === 'admin' ? '/admin' : '/app');
+      navigate(res.user.role === "admin" ? "/admin" : "/app");
     } catch (err) {
       setError(apiError(err));
     }
@@ -34,7 +36,7 @@ export default function LoginPage() {
       title="Connexion"
       footer={
         <>
-          Pas encore de compte ?{' '}
+          Pas encore de compte ?{" "}
           <Link to="/register" className="font-medium underline">
             S'inscrire
           </Link>
@@ -71,7 +73,7 @@ export default function LoginPage() {
           </Link>
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Connexion...' : 'Se connecter'}
+          {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
       </form>
     </AuthLayout>

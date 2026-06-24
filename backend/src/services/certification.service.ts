@@ -59,20 +59,20 @@ async function resolveTemplate(
 function templateData(
   student: PopulatedStudent,
   schoolName: string,
-  qrcode: string,
+  qrCodeUrl: string,
 ): Record<string, string> {
   return {
-    studentName: `${student.firstname} ${student.lastname}`,
+    student_name: `${student.firstname} ${student.lastname}`,
     firstname: student.firstname,
     lastname: student.lastname,
-    schoolName,
-    trainingLabel: student.training?.label ?? "",
-    specialityLabel: student.speciality?.label ?? "",
+    school_label: schoolName,
+    training_label: student.training?.label ?? "",
+    speciality_label: student.speciality?.label ?? "",
     grade: student.grade ?? "",
-    graduationDate: student.graduationDate
+    graduation_date: student.graduationDate
       ? new Date(student.graduationDate).toLocaleDateString("fr-FR")
       : "",
-    qrcode,
+    qr_code_url: qrCodeUrl,
   };
 }
 
@@ -110,10 +110,9 @@ export async function previewDiploma(
 
   // Preview uses a sample token (not persisted).
   const sampleQr = await qrDataUrl("preview-sample-token");
-  const qrImg = `<img src="${sampleQr}" alt="QR code" width="160" height="160" />`;
   const html = renderTemplate(
     template.content,
-    templateData(student, school?.label ?? "", qrImg),
+    templateData(student, school?.label ?? "", sampleQr),
   );
   return { html };
 }

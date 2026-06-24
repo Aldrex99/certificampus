@@ -1,9 +1,11 @@
 import { createApp } from "./app";
 import { connectDatabase } from "./config/db";
+import { seedIfEmpty } from "./scripts/seed";
 import { env } from "./config/env";
 
 async function bootstrap(): Promise<void> {
   await connectDatabase();
+  if (env.seedOnStart) await seedIfEmpty();
   const app = createApp();
   app.listen(env.port, () => {
     // eslint-disable-next-line no-console

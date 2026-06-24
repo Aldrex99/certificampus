@@ -3,7 +3,7 @@ import { Plus, Trash2, Pencil } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
-import { Table, Th, Td, Spinner, Alert } from '@/components/ui/misc';
+import { Table, Th, Td, Spinner } from '@/components/ui/misc';
 import {
   useGetTrainingsQuery,
   useCreateTrainingMutation,
@@ -11,7 +11,6 @@ import {
   useDeleteTrainingMutation,
 } from '@/store/api';
 import { Training } from '@/types';
-import { apiError } from '@/lib/errors';
 
 const empty = { label: '', level: '', description: '' };
 
@@ -25,27 +24,24 @@ export default function TrainingsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Training | null>(null);
   const [form, setForm] = useState(empty);
-  const [error, setError] = useState('');
 
   const items = data?.items ?? [];
 
-  const openCreate = () => { setEditing(null); setForm(empty); setError(''); setOpen(true); };
+  const openCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (t: Training) => {
     setEditing(t);
     setForm({ label: t.label, level: t.level ?? '', description: t.description ?? '' });
-    setError('');
     setOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
       if (editing) await updateTraining({ id: editing._id, body: form }).unwrap();
       else await createTraining(form).unwrap();
       setOpen(false);
-    } catch (err) {
-      setError(apiError(err));
+    } catch {
+      // Error toast handled globally by the toast middleware.
     }
   };
 
@@ -107,7 +103,6 @@ export default function TrainingsPage() {
         }
       >
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && <Alert>{error}</Alert>}
           <div className="space-y-1.5">
             <Label>Libellé</Label>
             <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />

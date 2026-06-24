@@ -11,7 +11,7 @@ export const createStudentSchema = z.object({
     speciality: z.string().optional(),
     status: status.optional(),
     grade: z.string().optional(),
-    graduationDate: z.coerce.date().optional(),
+    graduationDate: z.coerce.date().nullable().optional(),
   }),
 });
 
@@ -24,7 +24,7 @@ export const updateStudentSchema = z.object({
     speciality: z.string().nullable().optional(),
     status: status.optional(),
     grade: z.string().optional(),
-    graduationDate: z.coerce.date().optional(),
+    graduationDate: z.coerce.date().nullable().optional(),
   }),
 });
 

@@ -1,7 +1,9 @@
+# Development stack: hot-reload backend + Vite dev server + MongoDB.
+# Usage: docker compose up --build
 services:
   mongo:
     image: mongo:8
-    container_name: certificampus-mongo
+    container_name: certificampus-mongo-dev
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -11,14 +13,57 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-certificampus}
     volumes:
       - mongo_data:/data/db
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
+
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      target: build
+    container_name: certificampus-backend-dev
+    restart: unless-stopped
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:4000}
+      MONGO_URI: ${MONGO_URI}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
+      SPARKPOST_API_KEY: ${SPARKPOST_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@certificampus.app}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-CertifiCampus}
+      DIPLOMA_DIR: storage/diplomas
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+      - backend_storage:/app/storage
+    ports:
+      - "5002:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    container_name: certificampus-frontend-dev
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5001:5173"
+    depends_on:
+      - backend
 
 volumes:
   mongo_data:
+  backend_storage:

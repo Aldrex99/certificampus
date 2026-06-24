@@ -1,0 +1,80 @@
+# Production stack for the Debian VPS.
+# Images are pulled from the registry (built by CI). Override the tag with IMAGE_TAG.
+# Usage: docker compose -f docker-compose.prod.yml up -d
+services:
+  mongo:
+    image: mongo:8
+    container_name: certificampus-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+    volumes:
+      - mongo_data:/data/db
+    # Not published to the host: only reachable on the internal network.
+    expose:
+      - "27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  backend:
+    image: ${REGISTRY:-ghcr.io/owner/certificampus}-backend:${IMAGE_TAG:-latest}
+    container_name: certificampus-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      CLIENT_URL: ${CLIENT_URL}
+      PUBLIC_URL: ${PUBLIC_URL}
+      MONGO_URI: ${MONGO_URI}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_RESET_EXPIRES_IN: ${JWT_RESET_EXPIRES_IN:-1h}
+      JWT_ACTIVATION_EXPIRES_IN: ${JWT_ACTIVATION_EXPIRES_IN:-24h}
+      SPARKPOST_API_KEY: ${SPARKPOST_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      DIPLOMA_DIR: storage/diplomas
+    volumes:
+      - backend_storage:/app/storage
+    # Published on loopback only; the host nginx proxies to it.
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-5004}:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  frontend:
+    image: ${REGISTRY:-ghcr.io/owner/certificampus}-frontend:${IMAGE_TAG:-latest}
+    container_name: certificampus-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5003}:80"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+volumes:
+  mongo_data:
+  backend_storage:

@@ -22,7 +22,9 @@ function qrToken(): string {
 }
 
 function randomDate(from: Date, to: Date): Date {
-  return new Date(from.getTime() + Math.random() * (to.getTime() - from.getTime()));
+  return new Date(
+    from.getTime() + Math.random() * (to.getTime() - from.getTime()),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -71,9 +73,7 @@ const SCHOOL_TEMPLATE_CONTENT = `
 // Main seed function
 // ---------------------------------------------------------------------------
 
-async function seed(): Promise<void> {
-  await connectDatabase();
-
+export async function runSeed(): Promise<void> {
   // Clear all collections in dependency order
   await Promise.all([
     Diploma.deleteMany({}),
@@ -145,29 +145,83 @@ async function seed(): Promise<void> {
       trainings: [
         {
           label: "Développement Web Full Stack",
-          description: "Formation complète au développement web moderne (React, Node.js, MongoDB)",
+          description:
+            "Formation complète au développement web moderne (React, Node.js, MongoDB)",
           level: "Bac+3",
           specialities: [
-            { label: "Frontend React", description: "Spécialisation React, TypeScript et UI/UX" },
-            { label: "Backend Node.js", description: "API REST, bases de données et architecture serveur" },
+            {
+              label: "Frontend React",
+              description: "Spécialisation React, TypeScript et UI/UX",
+            },
+            {
+              label: "Backend Node.js",
+              description: "API REST, bases de données et architecture serveur",
+            },
           ],
         },
         {
           label: "Intelligence Artificielle & Data Science",
-          description: "Maîtrise des algorithmes de ML et de la science des données",
+          description:
+            "Maîtrise des algorithmes de ML et de la science des données",
           level: "Bac+5",
           specialities: [
-            { label: "Machine Learning", description: "Algorithmes supervisés et non supervisés" },
-            { label: "Data Engineering", description: "Pipelines de données et infrastructure cloud" },
+            {
+              label: "Machine Learning",
+              description: "Algorithmes supervisés et non supervisés",
+            },
+            {
+              label: "Data Engineering",
+              description: "Pipelines de données et infrastructure cloud",
+            },
           ],
         },
       ],
       students: [
-        { firstname: "Lucas", lastname: "Bernard", email: "lucas.bernard@student.fr", status: "admis" as const, grade: "Très Bien", trainingIdx: 0, specialityIdx: 0 },
-        { firstname: "Emma", lastname: "Leclerc", email: "emma.leclerc@student.fr", status: "admis" as const, grade: "Bien", trainingIdx: 0, specialityIdx: 1 },
-        { firstname: "Noah", lastname: "Martin", email: "noah.martin@student.fr", status: "admis" as const, grade: "Assez Bien", trainingIdx: 1, specialityIdx: 0 },
-        { firstname: "Chloé", lastname: "Petit", email: "chloe.petit@student.fr", status: "ajourne" as const, grade: undefined, trainingIdx: 1, specialityIdx: 1 },
-        { firstname: "Liam", lastname: "Moreau", email: "liam.moreau@student.fr", status: "admis" as const, grade: "Bien", trainingIdx: 0, specialityIdx: 0 },
+        {
+          firstname: "Lucas",
+          lastname: "Bernard",
+          email: "lucas.bernard@student.fr",
+          status: "admis" as const,
+          grade: "Très Bien",
+          trainingIdx: 0,
+          specialityIdx: 0,
+        },
+        {
+          firstname: "Emma",
+          lastname: "Leclerc",
+          email: "emma.leclerc@student.fr",
+          status: "admis" as const,
+          grade: "Bien",
+          trainingIdx: 0,
+          specialityIdx: 1,
+        },
+        {
+          firstname: "Noah",
+          lastname: "Martin",
+          email: "noah.martin@student.fr",
+          status: "admis" as const,
+          grade: "Assez Bien",
+          trainingIdx: 1,
+          specialityIdx: 0,
+        },
+        {
+          firstname: "Chloé",
+          lastname: "Petit",
+          email: "chloe.petit@student.fr",
+          status: "ajourne" as const,
+          grade: undefined,
+          trainingIdx: 1,
+          specialityIdx: 1,
+        },
+        {
+          firstname: "Liam",
+          lastname: "Moreau",
+          email: "liam.moreau@student.fr",
+          status: "admis" as const,
+          grade: "Bien",
+          trainingIdx: 0,
+          specialityIdx: 0,
+        },
       ],
     },
     {
@@ -193,28 +247,74 @@ async function seed(): Promise<void> {
       trainings: [
         {
           label: "Management & Stratégie d'Entreprise",
-          description: "Formation aux techniques de management moderne et à la stratégie",
+          description:
+            "Formation aux techniques de management moderne et à la stratégie",
           level: "Bac+5",
           specialities: [
-            { label: "Stratégie Digitale", description: "Transformation numérique et marketing digital" },
-            { label: "Finance d'Entreprise", description: "Gestion financière et contrôle de gestion" },
+            {
+              label: "Stratégie Digitale",
+              description: "Transformation numérique et marketing digital",
+            },
+            {
+              label: "Finance d'Entreprise",
+              description: "Gestion financière et contrôle de gestion",
+            },
           ],
         },
         {
           label: "Marketing & Communication",
-          description: "Maîtrise des outils marketing et de la communication moderne",
+          description:
+            "Maîtrise des outils marketing et de la communication moderne",
           level: "Bac+3",
           specialities: [
-            { label: "Marketing Digital", description: "SEO, SEA, réseaux sociaux et e-commerce" },
-            { label: "Relations Publiques", description: "Communication institutionnelle et gestion de crise" },
+            {
+              label: "Marketing Digital",
+              description: "SEO, SEA, réseaux sociaux et e-commerce",
+            },
+            {
+              label: "Relations Publiques",
+              description: "Communication institutionnelle et gestion de crise",
+            },
           ],
         },
       ],
       students: [
-        { firstname: "Sophie", lastname: "Laurent", email: "sophie.laurent@student.fr", status: "admis" as const, grade: "Très Bien", trainingIdx: 0, specialityIdx: 0 },
-        { firstname: "Thomas", lastname: "Simon", email: "thomas.simon@student.fr", status: "admis" as const, grade: "Bien", trainingIdx: 0, specialityIdx: 1 },
-        { firstname: "Inès", lastname: "Michel", email: "ines.michel@student.fr", status: "ajourne" as const, grade: undefined, trainingIdx: 1, specialityIdx: 0 },
-        { firstname: "Axel", lastname: "Garcia", email: "axel.garcia@student.fr", status: "admis" as const, grade: "Passable", trainingIdx: 1, specialityIdx: 1 },
+        {
+          firstname: "Sophie",
+          lastname: "Laurent",
+          email: "sophie.laurent@student.fr",
+          status: "admis" as const,
+          grade: "Très Bien",
+          trainingIdx: 0,
+          specialityIdx: 0,
+        },
+        {
+          firstname: "Thomas",
+          lastname: "Simon",
+          email: "thomas.simon@student.fr",
+          status: "admis" as const,
+          grade: "Bien",
+          trainingIdx: 0,
+          specialityIdx: 1,
+        },
+        {
+          firstname: "Inès",
+          lastname: "Michel",
+          email: "ines.michel@student.fr",
+          status: "ajourne" as const,
+          grade: undefined,
+          trainingIdx: 1,
+          specialityIdx: 0,
+        },
+        {
+          firstname: "Axel",
+          lastname: "Garcia",
+          email: "axel.garcia@student.fr",
+          status: "admis" as const,
+          grade: "Passable",
+          trainingIdx: 1,
+          specialityIdx: 1,
+        },
       ],
     },
     {
@@ -240,18 +340,49 @@ async function seed(): Promise<void> {
       trainings: [
         {
           label: "Aide-Soignant",
-          description: "Formation aux soins infirmiers et à l'accompagnement des patients",
+          description:
+            "Formation aux soins infirmiers et à l'accompagnement des patients",
           level: "CAP",
           specialities: [
-            { label: "Gériatrie", description: "Soins aux personnes âgées en établissement" },
-            { label: "Pédiatrie", description: "Accompagnement des enfants et familles" },
+            {
+              label: "Gériatrie",
+              description: "Soins aux personnes âgées en établissement",
+            },
+            {
+              label: "Pédiatrie",
+              description: "Accompagnement des enfants et familles",
+            },
           ],
         },
       ],
       students: [
-        { firstname: "Camille", lastname: "Rousseau", email: "camille.rousseau@student.fr", status: "admis" as const, grade: "Bien", trainingIdx: 0, specialityIdx: 0 },
-        { firstname: "Hugo", lastname: "Blanc", email: "hugo.blanc@student.fr", status: "admis" as const, grade: "Très Bien", trainingIdx: 0, specialityIdx: 1 },
-        { firstname: "Léa", lastname: "Fontaine", email: "lea.fontaine@student.fr", status: "ajourne" as const, grade: undefined, trainingIdx: 0, specialityIdx: 0 },
+        {
+          firstname: "Camille",
+          lastname: "Rousseau",
+          email: "camille.rousseau@student.fr",
+          status: "admis" as const,
+          grade: "Bien",
+          trainingIdx: 0,
+          specialityIdx: 0,
+        },
+        {
+          firstname: "Hugo",
+          lastname: "Blanc",
+          email: "hugo.blanc@student.fr",
+          status: "admis" as const,
+          grade: "Très Bien",
+          trainingIdx: 0,
+          specialityIdx: 1,
+        },
+        {
+          firstname: "Léa",
+          lastname: "Fontaine",
+          email: "lea.fontaine@student.fr",
+          status: "ajourne" as const,
+          grade: undefined,
+          trainingIdx: 0,
+          specialityIdx: 0,
+        },
       ],
     },
   ];
@@ -283,7 +414,9 @@ async function seed(): Promise<void> {
     });
 
     // Link subscription back to school
-    await Subscription.findByIdAndUpdate(subscription._id, { school: school._id });
+    await Subscription.findByIdAndUpdate(subscription._id, {
+      school: school._id,
+    });
 
     // Link user to school
     await User.findByIdAndUpdate(owner._id, { school: school._id });
@@ -304,7 +437,10 @@ async function seed(): Promise<void> {
       const specialityDocs: mongoose.Types.ObjectId[] = [];
 
       for (const sp of t.specialities) {
-        const speciality = await Speciality.create({ ...sp, school: school._id });
+        const speciality = await Speciality.create({
+          ...sp,
+          school: school._id,
+        });
         specialityDocs.push(speciality._id as mongoose.Types.ObjectId);
       }
 
@@ -327,10 +463,7 @@ async function seed(): Promise<void> {
       const trainingId = trainingDocs[s.trainingIdx];
       const specialityId = specialityMatrix[s.trainingIdx][s.specialityIdx];
 
-      const graduationDate =
-        s.status === "admis"
-          ? randomDate(new Date("2024-06-01"), new Date("2025-06-30"))
-          : undefined;
+      const graduationDate = randomDate(new Date("2024-01-01"), new Date());
 
       const student = await Student.create({
         firstname: s.firstname,
@@ -366,7 +499,7 @@ async function seed(): Promise<void> {
     }
 
     console.log(
-      `[seed] École "${data.school.label}" — ${data.students.length} étudiants, ${admittedStudents.length} diplômes publiés`
+      `[seed] École "${data.school.label}" — ${data.students.length} étudiants, ${admittedStudents.length} diplômes publiés`,
     );
   }
 
@@ -399,11 +532,24 @@ async function seed(): Promise<void> {
   console.log("  marie.dupont@ecole-tech.fr / School1234! (role: school)");
   console.log("  jp.renard@business-school.fr / School1234! (role: school)");
   console.log("  f.ouali@sante-formation.fr  / School1234! (role: school)");
-
-  await disconnectDatabase();
 }
 
-seed().catch((err) => {
-  console.error("[seed] Erreur :", err);
-  disconnectDatabase().finally(() => process.exit(1));
-});
+export async function seedIfEmpty(): Promise<void> {
+  const userCount = await User.estimatedDocumentCount();
+  if (userCount > 0) {
+    console.log("[seed] Base déjà peuplée, seed ignoré");
+    return;
+  }
+  console.log("[seed] Base vide détectée, exécution du seed initial…");
+  await runSeed();
+}
+
+if (require.main === module) {
+  connectDatabase()
+    .then(runSeed)
+    .then(() => disconnectDatabase())
+    .catch((err) => {
+      console.error("[seed] Erreur :", err);
+      disconnectDatabase().finally(() => process.exit(1));
+    });
+}

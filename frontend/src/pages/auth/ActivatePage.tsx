@@ -4,7 +4,7 @@ import { AuthLayout } from './AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
 import { Alert } from '@/components/ui/misc';
-import { useActivateMutation } from '@/store/api';
+import { api, useActivateMutation } from '@/store/api';
 import { useAppDispatch } from '@/store';
 import { setCredentials } from '@/store/authSlice';
 import { apiError } from '@/lib/errors';
@@ -24,6 +24,8 @@ export default function ActivatePage() {
     setError('');
     try {
       const res = await activate({ email, token, password: password || undefined }).unwrap();
+      // Clear any cache left from a previous session before the new one loads.
+      dispatch(api.util.resetApiState());
       dispatch(setCredentials(res));
       navigate('/app');
     } catch (err) {
