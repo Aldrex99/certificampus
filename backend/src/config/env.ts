@@ -43,4 +43,8 @@ export const env = {
     process.cwd(),
     process.env.DIPLOMA_DIR ?? "storage/diplomas",
   ),
+
+  // Path to a system Chromium for Puppeteer (set in the Docker image).
+  // Empty -> Puppeteer uses its bundled browser (local dev).
+  puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH ?? "",
 };

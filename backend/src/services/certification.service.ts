@@ -12,7 +12,7 @@ import {
 } from "../models";
 import { ApiError } from "../utils/ApiError";
 import { generateQrToken } from "../utils/jwt";
-import { qrDataUrl, qrPngBuffer, verificationUrl } from "../utils/qrcode";
+import { qrDataUrl, verificationUrl } from "../utils/qrcode";
 import { generateDiplomaPdf, diplomaPublicUrl } from "../utils/pdf";
 import { renderTemplate, DEFAULT_DIPLOMA_TEMPLATE } from "../utils/render";
 import { sendEmail } from "../utils/email";
@@ -173,22 +173,19 @@ export async function generateDiplomas(
       generatedAt: new Date(),
     });
 
-    const qrPng = await qrPngBuffer(qrToken);
-    const filePath = await generateDiplomaPdf({
-      studentName: `${student.firstname} ${student.lastname}`,
-      trainingLabel: student.training?.label,
-      specialityLabel: student.speciality?.label,
-      schoolName: school.label,
-      grade: student.grade,
-      graduationDate: student.graduationDate,
-      templateName: template.name,
-      qrPng,
+    // Render the diploma template to HTML, then to PDF (matches the preview).
+    const qrCodeUrl = await qrDataUrl(qrToken);
+    const html = renderTemplate(
+      template.content,
+      templateData(student, school.label, qrCodeUrl),
+    );
+    await generateDiplomaPdf({
+      html,
       fileName: `${diploma._id}.pdf`,
     });
 
     diploma.fileUrl = diplomaPublicUrl(`${diploma._id}.pdf`);
     await diploma.save();
-    void filePath;
 
     await Student.updateOne(
       { _id: student._id },
