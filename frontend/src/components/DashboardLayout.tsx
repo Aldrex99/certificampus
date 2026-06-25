@@ -61,11 +61,11 @@ export function DashboardLayout({ variant }: { variant: "school" | "admin" }) {
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <aside className="flex w-64 flex-col bg-brand text-white">
+      <aside className="sticky top-0 flex h-screen w-64 flex-col bg-brand text-white">
         <div className="flex h-16 items-center border-b border-white/10 px-6">
           <Logo light className="text-xl" />
         </div>
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
           {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
