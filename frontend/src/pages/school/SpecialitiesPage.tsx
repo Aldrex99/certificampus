@@ -1,0 +1,116 @@
+import { FormEvent, useState } from 'react';
+import { Plus, Trash2, Pencil } from 'lucide-react';
+import { PageHeader, Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Input, Label } from '@/components/ui/input';
+import { Table, Th, Td, Spinner } from '@/components/ui/misc';
+import {
+  useGetSpecialitiesQuery,
+  useCreateSpecialityMutation,
+  useUpdateSpecialityMutation,
+  useDeleteSpecialityMutation,
+} from '@/store/api';
+import { Speciality } from '@/types';
+
+const empty = { label: '', description: '' };
+
+export default function SpecialitiesPage() {
+  const [search, setSearch] = useState('');
+  const { data, isLoading } = useGetSpecialitiesQuery({ search });
+  const [createSpeciality] = useCreateSpecialityMutation();
+  const [updateSpeciality] = useUpdateSpecialityMutation();
+  const [deleteSpeciality] = useDeleteSpecialityMutation();
+
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Speciality | null>(null);
+  const [form, setForm] = useState(empty);
+
+  const items = data?.items ?? [];
+
+  const openCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
+  const openEdit = (s: Speciality) => {
+    setEditing(s);
+    setForm({ label: s.label, description: s.description ?? '' });
+    setOpen(true);
+  };
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editing) await updateSpeciality({ id: editing._id, body: form }).unwrap();
+      else await createSpeciality(form).unwrap();
+      setOpen(false);
+    } catch {
+      // Error toast handled globally by the toast middleware.
+    }
+  };
+
+  return (
+    <div>
+      <PageHeader
+        title="Spécialités"
+        description="Gérez les spécialités rattachées aux formations de votre établissement."
+        actions={<Button onClick={openCreate}><Plus className="h-4 w-4" /> Ajouter</Button>}
+      />
+
+      <div className="mb-4">
+        <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-16"><Spinner /></div>
+      ) : (
+        <Table>
+          <thead>
+            <tr>
+              <Th>Libellé</Th>
+              <Th>Description</Th>
+              <Th className="text-right">Actions</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.length === 0 ? (
+              <tr><Td className="py-8 text-center text-muted-foreground">Aucune spécialité</Td></tr>
+            ) : (
+              items.map((s) => (
+                <tr key={s._id}>
+                  <Td className="font-medium">{s.label}</Td>
+                  <Td className="text-muted-foreground">{s.description ?? '—'}</Td>
+                  <Td className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteSpeciality(s._id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </div>
+                  </Td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Table>
+      )}
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={editing ? 'Modifier la spécialité' : 'Ajouter une spécialité'}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button onClick={onSubmit}>{editing ? 'Enregistrer' : 'Créer'}</Button>
+          </>
+        }
+      >
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Libellé</Label>
+            <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Description</Label>
+            <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}

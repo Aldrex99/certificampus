@@ -32,6 +32,12 @@ export interface Training {
   specialities?: { _id: string; label: string }[];
 }
 
+export interface Speciality {
+  _id: string;
+  label: string;
+  description?: string;
+}
+
 export interface Diploma {
   _id: string;
   qrToken: string;

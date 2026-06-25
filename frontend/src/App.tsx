@@ -13,6 +13,7 @@ import VerifyPage from "./pages/VerifyPage";
 
 import StudentsPage from "./pages/school/StudentsPage";
 import TrainingsPage from "./pages/school/TrainingsPage";
+import SpecialitiesPage from "./pages/school/SpecialitiesPage";
 import SettingsPage from "./pages/school/SettingsPage";
 import SchoolDashboard from "./pages/school/SchoolDashboard";
 import CertificationsPage from "./pages/school/CertificationsPage";
@@ -44,6 +45,7 @@ export default function App() {
           <Route index element={<SchoolDashboard />} />
           <Route path="students" element={<StudentsPage />} />
           <Route path="trainings" element={<TrainingsPage />} />
+          <Route path="specialities" element={<SpecialitiesPage />} />
           <Route path="certifications" element={<CertificationsPage />} />
           <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="settings" element={<SettingsPage />} />
