@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PublicOnlyRoute } from "./components/PublicOnlyRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 
 import LandingPage from "./pages/LandingPage";
@@ -28,7 +29,9 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route element={<PublicOnlyRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/activate" element={<ActivatePage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
