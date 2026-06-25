@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
 import path from "path";
 
-dotenv.config();
+if (process.env.NODE_ENV !== "test") {
+  dotenv.config();
+}
 
 function required(name: string, fallback?: string): string {
   const value = process.env[name] ?? fallback;
@@ -47,4 +49,16 @@ export const env = {
   // Path to a system Chromium for Puppeteer (set in the Docker image).
   // Empty -> Puppeteer uses its bundled browser (local dev).
   puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH ?? "",
+
+  // Stripe (kept in test mode even on prod for the demo).
+  // When the secret key is empty, billing runs in a self-contained "mock"
+  // mode that activates subscriptions instantly without calling Stripe.
+  // Forced empty in tests so the mock path is exercised regardless of any
+  // Stripe key present in the shell environment.
+  stripeSecretKey:
+    process.env.NODE_ENV === "test"
+      ? ""
+      : (process.env.STRIPE_SECRET_KEY ?? ""),
+  stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
 };

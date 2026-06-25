@@ -1,7 +1,7 @@
 import { Application } from 'express';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { User, School } from '../src/models';
+import { User, School, Plan, Subscription } from '../src/models';
 import { hashPassword } from '../src/utils/password';
 import { signAccessToken } from '../src/utils/jwt';
 
@@ -14,10 +14,19 @@ export interface SchoolContext {
   email: string;
 }
 
-/** Creates a verified school account directly in the DB and returns a token. */
+interface SchoolContextOptions {
+  /** Certificate quota of the seeded active subscription. 0 = no subscription. */
+  quota?: number;
+}
+
+/** Creates a verified school account directly in the DB and returns a token.
+ *  By default the school gets an active subscription with a generous quota so
+ *  certificate generation is not blocked. Pass `{ quota: 0 }` to skip it. */
 export async function createSchoolContext(
-  email = 'school@example.com'
+  email = 'school@example.com',
+  options: SchoolContextOptions = {}
 ): Promise<SchoolContext> {
+  const { quota = 100 } = options;
   const user = await User.create({
     firstname: 'Marie',
     lastname: 'Curie',
@@ -29,6 +38,28 @@ export async function createSchoolContext(
   const school = await School.create({ label: 'École Test', owner: user._id });
   user.school = school._id as never;
   await user.save();
+
+  if (quota > 0) {
+    const plan = await Plan.create({
+      name: 'Test',
+      price: 10,
+      interval: 'month',
+      certificateQuota: quota,
+    });
+    const start = new Date();
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+    const sub = await Subscription.create({
+      plan: plan._id,
+      school: school._id,
+      status: 'active',
+      usedThisPeriod: 0,
+      currentPeriodStart: start,
+      currentPeriodEnd: end,
+    });
+    school.subscription = sub._id as never;
+    await school.save();
+  }
 
   const token = signAccessToken({
     sub: String(user._id),

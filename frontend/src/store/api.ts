@@ -4,8 +4,10 @@ import { axiosInstance } from '@/lib/axios';
 import {
   AdminDashboard,
   AuthUser,
+  CurrentSubscription,
   Diploma,
   Paginated,
+  Plan,
   School,
   SchoolDashboard,
   Student,
@@ -46,7 +48,7 @@ const baseQuery: BaseQueryFn<string | AxiosQueryArgs, unknown, unknown> = async 
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['Student', 'Training', 'Certifiable', 'School', 'Subscription', 'Template', 'Dashboard', 'Profile'],
+  tagTypes: ['Student', 'Training', 'Certifiable', 'School', 'Subscription', 'Plan', 'Billing', 'Template', 'Dashboard', 'Profile'],
   endpoints: (builder) => ({
     /* ----------------------------- Auth ----------------------------- */
     login: builder.mutation<{ user: AuthUser }, { email: string; password: string }>({
@@ -146,6 +148,23 @@ export const api = createApi({
       invalidatesTags: ['Dashboard'],
     }),
 
+    /* ----------------------------- Billing -------------------------- */
+    getPlans: builder.query<Plan[], void>({
+      query: () => '/billing/plans',
+      transformResponse: unwrap,
+      providesTags: ['Plan'],
+    }),
+    getMySubscription: builder.query<CurrentSubscription, void>({
+      query: () => '/billing/subscription',
+      transformResponse: unwrap,
+      providesTags: ['Billing'],
+    }),
+    createCheckout: builder.mutation<{ url: string; mocked: boolean }, { planId: string }>({
+      query: (body) => ({ url: '/billing/checkout', method: 'POST', body }),
+      transformResponse: unwrap,
+      invalidatesTags: ['Billing'],
+    }),
+
     /* ----------------------------- Settings ------------------------- */
     getProfile: builder.query<{ user: AuthUser; school: School | null }, void>({
       query: () => '/settings/profile',
@@ -200,6 +219,23 @@ export const api = createApi({
       query: (id) => ({ url: `/admin/subscriptions/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Subscription', 'Dashboard'],
     }),
+    getAdminPlans: builder.query<Plan[], void>({
+      query: () => '/admin/plans',
+      transformResponse: unwrap,
+      providesTags: ['Plan'],
+    }),
+    createPlan: builder.mutation<Plan, Partial<Plan>>({
+      query: (body) => ({ url: '/admin/plans', method: 'POST', body }),
+      invalidatesTags: ['Plan'],
+    }),
+    updatePlan: builder.mutation<Plan, { id: string; body: Partial<Plan> }>({
+      query: ({ id, body }) => ({ url: `/admin/plans/${id}`, method: 'PUT', body }),
+      invalidatesTags: ['Plan'],
+    }),
+    deletePlan: builder.mutation<void, string>({
+      query: (id) => ({ url: `/admin/plans/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Plan'],
+    }),
     getTemplates: builder.query<TemplateDiploma[], void>({
       query: () => '/admin/templates',
       transformResponse: unwrap,
@@ -243,6 +279,9 @@ export const {
   useLazyPreviewDiplomaQuery,
   useGenerateDiplomasMutation,
   usePublishDiplomasMutation,
+  useGetPlansQuery,
+  useGetMySubscriptionQuery,
+  useCreateCheckoutMutation,
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
@@ -255,6 +294,10 @@ export const {
   useCreateSubscriptionMutation,
   useUpdateSubscriptionMutation,
   useDeleteSubscriptionMutation,
+  useGetAdminPlansQuery,
+  useCreatePlanMutation,
+  useUpdatePlanMutation,
+  useDeletePlanMutation,
   useGetTemplatesQuery,
   useCreateTemplateMutation,
   useUpdateTemplateMutation,

@@ -5,6 +5,8 @@ import {
   User,
   Subscription,
   ISubscription,
+  Plan,
+  IPlan,
   Diploma,
   TemplateDiploma,
   ITemplateDiploma,
@@ -191,6 +193,34 @@ export async function updateSubscription(
 
 export async function deleteSubscriptions(ids: string[]): Promise<number> {
   const result = await Subscription.deleteMany({ _id: { $in: ids } });
+  return result.deletedCount ?? 0;
+}
+
+/* ----------------------------- Plans ------------------------------ */
+
+export async function listPlans(): Promise<IPlan[]> {
+  return Plan.find({}).sort({ price: 1 });
+}
+
+export async function createPlan(input: Partial<IPlan>): Promise<IPlan> {
+  return Plan.create(input);
+}
+
+export async function updatePlan(
+  id: string,
+  input: Partial<IPlan>,
+): Promise<IPlan> {
+  const plan = await Plan.findByIdAndUpdate(
+    id,
+    { $set: input },
+    { new: true, runValidators: true },
+  );
+  if (!plan) throw ApiError.notFound("Formule introuvable");
+  return plan;
+}
+
+export async function deletePlans(ids: string[]): Promise<number> {
+  const result = await Plan.deleteMany({ _id: { $in: ids } });
   return result.deletedCount ?? 0;
 }
 

@@ -21,6 +21,7 @@ import {
   GenerateInput,
   PublishInput,
 } from "../validators/certification.schema";
+import { consumeCertificateQuota } from "./billing.service";
 
 interface PopulatedStudent {
   _id: Types.ObjectId;
@@ -144,6 +145,9 @@ export async function generateDiplomas(
 
   const result: GenerateResult = { generated: [], skipped: [] };
 
+  // Resolve eligible students first so the quota check covers exactly the
+  // number of certificates that will actually be issued.
+  const eligible: PopulatedStudent[] = [];
   for (const studentId of input.studentIds) {
     const student = (await Student.findOne({ _id: studentId, school: schoolId })
       .populate("training", "label")
@@ -154,10 +158,20 @@ export async function generateDiplomas(
       continue;
     }
     if (student.status !== "admis") {
-      result.skipped.push({ studentId, reason: "Étudiant non admis" });
+      result.skipped.push({
+        studentId,
+        reason: "Étudiant non admis",
+      });
       continue;
     }
+    eligible.push(student);
+  }
 
+  // Strict quota enforcement: reserve the certificates up front. Throws (402)
+  // if the school has no active subscription or the period quota is exceeded.
+  await consumeCertificateQuota(schoolId, eligible.length);
+
+  for (const student of eligible) {
     const qrToken = generateQrToken();
     const diploma = await Diploma.create({
       student: student._id,

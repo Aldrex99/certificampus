@@ -35,7 +35,7 @@ export default function SubscriptionsPage() {
   const openCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (s: Subscription) => {
     setEditing(s);
-    setForm({ name: s.name, type: s.type, price: s.price, status: s.status });
+    setForm({ name: s.name ?? '', type: s.type ?? 'monthly', price: s.price ?? 0, status: s.status });
     setOpen(true);
   };
 

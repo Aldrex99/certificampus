@@ -15,10 +15,12 @@ import TrainingsPage from "./pages/school/TrainingsPage";
 import SettingsPage from "./pages/school/SettingsPage";
 import SchoolDashboard from "./pages/school/SchoolDashboard";
 import CertificationsPage from "./pages/school/CertificationsPage";
+import SubscriptionPage from "./pages/school/SubscriptionPage";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SchoolsPage from "./pages/admin/SchoolsPage";
 import SubscriptionsPage from "./pages/admin/SubscriptionsPage";
+import PlansPage from "./pages/admin/PlansPage";
 import TemplatesPage from "./pages/admin/TemplatesPage";
 
 export default function App() {
@@ -40,6 +42,7 @@ export default function App() {
           <Route path="students" element={<StudentsPage />} />
           <Route path="trainings" element={<TrainingsPage />} />
           <Route path="certifications" element={<CertificationsPage />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
@@ -49,6 +52,7 @@ export default function App() {
         <Route path="/admin" element={<DashboardLayout variant="admin" />}>
           <Route index element={<AdminDashboard />} />
           <Route path="schools" element={<SchoolsPage />} />
+          <Route path="plans" element={<PlansPage />} />
           <Route path="subscriptions" element={<SubscriptionsPage />} />
           <Route path="templates" element={<TemplatesPage />} />
         </Route>
