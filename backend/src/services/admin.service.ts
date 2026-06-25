@@ -158,6 +158,7 @@ export async function listSubscriptions(pagination: Pagination): Promise<{
   const [items, total] = await Promise.all([
     Subscription.find({})
       .populate("school", "label")
+      .populate("plan", "name interval price certificateQuota")
       .sort({ createdAt: -1 })
       .skip(pagination.skip)
       .limit(pagination.limit),

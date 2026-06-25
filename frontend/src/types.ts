@@ -65,6 +65,7 @@ export interface Subscription {
   school?: { label: string } | string;
   plan?: Plan | string;
   usedThisPeriod?: number;
+  currentPeriodStart?: string;
   currentPeriodEnd?: string;
 }
 
