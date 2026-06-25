@@ -134,13 +134,13 @@ export const api = createApi({
       transformResponse: unwrap,
       providesTags: ['Speciality'],
     }),
-    createSpeciality: builder.mutation<Speciality, Partial<Speciality>>({
+    createSpeciality: builder.mutation<Speciality, { label: string; description?: string; training?: string }>({
       query: (body) => ({ url: '/specialities', method: 'POST', body }),
-      invalidatesTags: ['Speciality'],
+      invalidatesTags: ['Speciality', 'Training'],
     }),
-    updateSpeciality: builder.mutation<Speciality, { id: string; body: Partial<Speciality> }>({
+    updateSpeciality: builder.mutation<Speciality, { id: string; body: { label?: string; description?: string; training?: string } }>({
       query: ({ id, body }) => ({ url: `/specialities/${id}`, method: 'PUT', body }),
-      invalidatesTags: ['Speciality'],
+      invalidatesTags: ['Speciality', 'Training'],
     }),
     deleteSpeciality: builder.mutation<void, string>({
       query: (id) => ({ url: `/specialities/${id}`, method: 'DELETE' }),

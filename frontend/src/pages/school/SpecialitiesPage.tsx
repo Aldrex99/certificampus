@@ -2,21 +2,23 @@ import { FormEvent, useState } from 'react';
 import { Plus, Trash2, Pencil } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Input, Label } from '@/components/ui/input';
+import { Input, Label, Select } from '@/components/ui/input';
 import { Table, Th, Td, Spinner } from '@/components/ui/misc';
 import {
   useGetSpecialitiesQuery,
+  useGetTrainingsQuery,
   useCreateSpecialityMutation,
   useUpdateSpecialityMutation,
   useDeleteSpecialityMutation,
 } from '@/store/api';
 import { Speciality } from '@/types';
 
-const empty = { label: '', description: '' };
+const empty = { label: '', description: '', training: '' };
 
 export default function SpecialitiesPage() {
   const [search, setSearch] = useState('');
   const { data, isLoading } = useGetSpecialitiesQuery({ search });
+  const { data: trainings } = useGetTrainingsQuery({});
   const [createSpeciality] = useCreateSpecialityMutation();
   const [updateSpeciality] = useUpdateSpecialityMutation();
   const [deleteSpeciality] = useDeleteSpecialityMutation();
@@ -30,7 +32,7 @@ export default function SpecialitiesPage() {
   const openCreate = () => { setEditing(null); setForm(empty); setOpen(true); };
   const openEdit = (s: Speciality) => {
     setEditing(s);
-    setForm({ label: s.label, description: s.description ?? '' });
+    setForm({ label: s.label, description: s.description ?? '', training: s.training?._id ?? '' });
     setOpen(true);
   };
 
@@ -64,6 +66,7 @@ export default function SpecialitiesPage() {
           <thead>
             <tr>
               <Th>Libellé</Th>
+              <Th>Formation</Th>
               <Th>Description</Th>
               <Th className="text-right">Actions</Th>
             </tr>
@@ -75,6 +78,7 @@ export default function SpecialitiesPage() {
               items.map((s) => (
                 <tr key={s._id}>
                   <Td className="font-medium">{s.label}</Td>
+                  <Td className="text-muted-foreground">{s.training?.label ?? '—'}</Td>
                   <Td className="text-muted-foreground">{s.description ?? '—'}</Td>
                   <Td className="text-right">
                     <div className="flex justify-end gap-1">
@@ -104,6 +108,15 @@ export default function SpecialitiesPage() {
           <div className="space-y-1.5">
             <Label>Libellé</Label>
             <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Formation</Label>
+            <Select value={form.training} onChange={(e) => setForm({ ...form, training: e.target.value })}>
+              <option value="">Aucune formation</option>
+              {trainings?.items.map((t) => (
+                <option key={t._id} value={t._id}>{t.label}</option>
+              ))}
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Description</Label>

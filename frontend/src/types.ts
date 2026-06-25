@@ -36,6 +36,7 @@ export interface Speciality {
   _id: string;
   label: string;
   description?: string;
+  training?: { _id: string; label: string } | null;
 }
 
 export interface Diploma {
