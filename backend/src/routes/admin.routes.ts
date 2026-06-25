@@ -7,6 +7,8 @@ import {
   updateSchoolSchema,
   createSubscriptionSchema,
   updateSubscriptionSchema,
+  createPlanSchema,
+  updatePlanSchema,
   createTemplateSchema,
   updateTemplateSchema,
   bulkDeleteSchema,
@@ -57,6 +59,17 @@ router.put(
   controller.updateSubscription,
 );
 router.delete("/subscriptions/:id", controller.deleteSubscription);
+
+/* Plans (subscription catalog) */
+router.get("/plans", controller.listPlans);
+router.post("/plans", validate(createPlanSchema), controller.createPlan);
+router.post(
+  "/plans/bulk-delete",
+  validate(bulkDeleteSchema),
+  controller.bulkDeletePlans,
+);
+router.put("/plans/:id", validate(updatePlanSchema), controller.updatePlan);
+router.delete("/plans/:id", controller.deletePlan);
 
 /* Diploma templates */
 router.get("/templates", controller.listTemplates);

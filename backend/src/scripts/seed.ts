@@ -5,6 +5,7 @@ import { connectDatabase, disconnectDatabase } from "../config/db";
 import { User } from "../models/User";
 import { School } from "../models/School";
 import { Subscription } from "../models/Subscription";
+import { Plan } from "../models/Plan";
 import { Training } from "../models/Training";
 import { Speciality } from "../models/Speciality";
 import { Student } from "../models/Student";
@@ -82,6 +83,7 @@ export async function runSeed(): Promise<void> {
     Training.deleteMany({}),
     Speciality.deleteMany({}),
     Subscription.deleteMany({}),
+    Plan.deleteMany({}),
     School.deleteMany({}),
     User.deleteMany({}),
   ]);
@@ -118,6 +120,39 @@ export async function runSeed(): Promise<void> {
   console.log("[seed] Modèle global créé :", globalTemplate.name);
 
   // ---------------------------------------------------------------------------
+  // 2b. Subscription plans (catalog managed by the admin)
+  // ---------------------------------------------------------------------------
+
+  const plans = await Plan.create([
+    {
+      name: "Starter",
+      description: "Idéal pour les petites structures",
+      price: 49,
+      interval: "month",
+      certificateQuota: 50,
+      isActive: true,
+    },
+    {
+      name: "Pro",
+      description: "Pour les établissements actifs",
+      price: 149,
+      interval: "month",
+      certificateQuota: 200,
+      isActive: true,
+    },
+    {
+      name: "Campus",
+      description: "Volume annuel avantageux",
+      price: 1490,
+      interval: "year",
+      certificateQuota: 3000,
+      isActive: true,
+    },
+  ]);
+
+  console.log("[seed] Formules créées :", plans.map((p) => p.name).join(", "));
+
+  // ---------------------------------------------------------------------------
   // 3. Schools with their owners, subscriptions, trainings, specialities, etc.
   // ---------------------------------------------------------------------------
 
@@ -134,14 +169,7 @@ export async function runSeed(): Promise<void> {
         address: "12 Rue de l'Innovation, 75001 Paris",
         region: "Île-de-France",
       },
-      subscription: {
-        name: "Abonnement Annuel Premium",
-        type: "yearly" as const,
-        price: 1200,
-        status: "active" as const,
-        startDate: new Date("2025-01-01"),
-        endDate: new Date("2025-12-31"),
-      },
+      subscription: { planIdx: 2, used: 18 },
       trainings: [
         {
           label: "Développement Web Full Stack",
@@ -236,14 +264,7 @@ export async function runSeed(): Promise<void> {
         address: "45 Avenue des Affaires, 69002 Lyon",
         region: "Auvergne-Rhône-Alpes",
       },
-      subscription: {
-        name: "Abonnement Mensuel Standard",
-        type: "monthly" as const,
-        price: 120,
-        status: "active" as const,
-        startDate: new Date("2025-06-01"),
-        endDate: new Date("2025-07-01"),
-      },
+      subscription: { planIdx: 1, used: 45 },
       trainings: [
         {
           label: "Management & Stratégie d'Entreprise",
@@ -329,14 +350,7 @@ export async function runSeed(): Promise<void> {
         address: "8 Boulevard Pasteur, 13005 Marseille",
         region: "Provence-Alpes-Côte d'Azur",
       },
-      subscription: {
-        name: "Abonnement Unique",
-        type: "one-time" as const,
-        price: 500,
-        status: "active" as const,
-        startDate: new Date("2025-03-15"),
-        endDate: new Date("2026-03-15"),
-      },
+      subscription: { planIdx: 0, used: 12 },
       trainings: [
         {
           label: "Aide-Soignant",
@@ -399,9 +413,25 @@ export async function runSeed(): Promise<void> {
       isVerified: true,
     });
 
-    // Subscription
+    // Subscription bound to a plan, with a fresh billing period.
+    const plan = plans[data.subscription.planIdx];
+    const periodStart = new Date();
+    const periodEnd = new Date(periodStart);
+    if (plan.interval === "year")
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
     const subscription = await Subscription.create({
-      ...data.subscription,
+      plan: plan._id,
+      status: "active",
+      name: plan.name,
+      price: plan.price,
+      type: plan.interval === "year" ? "yearly" : "monthly",
+      usedThisPeriod: data.subscription.used,
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
+      startDate: periodStart,
+      endDate: periodEnd,
       school: undefined, // will be linked after school creation
     });
 
@@ -510,6 +540,7 @@ export async function runSeed(): Promise<void> {
   const counts = await Promise.all([
     User.countDocuments(),
     School.countDocuments(),
+    Plan.countDocuments(),
     Subscription.countDocuments(),
     Training.countDocuments(),
     Speciality.countDocuments(),
@@ -521,12 +552,13 @@ export async function runSeed(): Promise<void> {
   console.log("\n[seed] ✓ Base de données peuplée avec succès :");
   console.log(`  Users            : ${counts[0]}`);
   console.log(`  Schools          : ${counts[1]}`);
-  console.log(`  Subscriptions    : ${counts[2]}`);
-  console.log(`  Trainings        : ${counts[3]}`);
-  console.log(`  Specialities     : ${counts[4]}`);
-  console.log(`  Students         : ${counts[5]}`);
-  console.log(`  Diplomas         : ${counts[6]}`);
-  console.log(`  TemplateDiplomas : ${counts[7]}`);
+  console.log(`  Plans            : ${counts[2]}`);
+  console.log(`  Subscriptions    : ${counts[3]}`);
+  console.log(`  Trainings        : ${counts[4]}`);
+  console.log(`  Specialities     : ${counts[5]}`);
+  console.log(`  Students         : ${counts[6]}`);
+  console.log(`  Diplomas         : ${counts[7]}`);
+  console.log(`  TemplateDiplomas : ${counts[8]}`);
   console.log("\n[seed] Comptes disponibles :");
   console.log("  admin@certificampus.com   / Admin1234!  (role: admin)");
   console.log("  marie.dupont@ecole-tech.fr / School1234! (role: school)");

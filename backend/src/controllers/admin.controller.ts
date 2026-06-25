@@ -85,6 +85,38 @@ export const bulkDeleteSubscriptions = asyncHandler(
   },
 );
 
+export const listPlans = asyncHandler(
+  async (_req: AuthRequest, res: Response) => {
+    ok(res, await service.listPlans());
+  },
+);
+
+export const createPlan = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    created(res, await service.createPlan(req.body));
+  },
+);
+
+export const updatePlan = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    ok(res, await service.updatePlan(req.params.id, req.body));
+  },
+);
+
+export const deletePlan = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const deleted = await service.deletePlans([req.params.id]);
+    if (!deleted) throw ApiError.notFound("Formule introuvable");
+    noContent(res);
+  },
+);
+
+export const bulkDeletePlans = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    ok(res, { deleted: await service.deletePlans(req.body.ids) });
+  },
+);
+
 export const listTemplates = asyncHandler(
   async (_req: AuthRequest, res: Response) => {
     ok(res, await service.listTemplates());

@@ -9,6 +9,7 @@ import {
   Building2,
   CreditCard,
   FileText,
+  Tag,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { logout } from "@/store/authSlice";
@@ -27,12 +28,14 @@ const schoolNav: NavItem[] = [
   { to: "/app/students", label: "Étudiants", icon: Users },
   { to: "/app/trainings", label: "Formations", icon: GraduationCap },
   { to: "/app/certifications", label: "Certifications", icon: Award },
+  { to: "/app/subscription", label: "Abonnement", icon: CreditCard },
   { to: "/app/settings", label: "Paramètres", icon: Settings },
 ];
 
 const adminNav: NavItem[] = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
   { to: "/admin/schools", label: "Établissements", icon: Building2 },
+  { to: "/admin/plans", label: "Formules", icon: Tag },
   { to: "/admin/subscriptions", label: "Abonnements", icon: CreditCard },
   { to: "/admin/templates", label: "Templates", icon: FileText },
 ];

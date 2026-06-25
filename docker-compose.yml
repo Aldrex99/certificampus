@@ -39,6 +39,9 @@ services:
       EMAIL_FROM: ${EMAIL_FROM:-no-reply@certificampus.app}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-CertifiCampus}
       DIPLOMA_DIR: storage/diplomas
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     volumes:
       - ./backend/src:/app/src
       - ./backend/package.json:/app/package.json

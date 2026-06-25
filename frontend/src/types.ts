@@ -58,11 +58,36 @@ export interface School {
 
 export interface Subscription {
   _id: string;
-  name: string;
-  type: "monthly" | "yearly" | "one-time";
-  price: number;
+  name?: string;
+  type?: "monthly" | "yearly" | "one-time";
+  price?: number;
   status: "active" | "pending" | "cancelled" | "expired";
   school?: { label: string } | string;
+  plan?: Plan | string;
+  usedThisPeriod?: number;
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+}
+
+export interface Plan {
+  _id: string;
+  name: string;
+  description?: string;
+  price: number;
+  interval: "month" | "year";
+  certificateQuota: number;
+  stripePriceId?: string;
+  isActive: boolean;
+}
+
+/** School's current subscription with usage, as returned by /billing/subscription. */
+export interface CurrentSubscription {
+  subscription: Subscription | null;
+  plan: Plan | null;
+  quota: number;
+  used: number;
+  remaining: number;
+  periodEnd: string | null;
 }
 
 export interface TemplateDiploma {

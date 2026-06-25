@@ -44,6 +44,30 @@ export const updateSubscriptionSchema = z.object({
   }),
 });
 
+export const createPlanSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "Nom de la formule requis"),
+    description: z.string().optional(),
+    price: z.number().min(0),
+    interval: z.enum(["month", "year"]).optional(),
+    certificateQuota: z.number().int().min(1),
+    stripePriceId: z.string().optional(),
+    isActive: z.boolean().optional(),
+  }),
+});
+
+export const updatePlanSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    price: z.number().min(0).optional(),
+    interval: z.enum(["month", "year"]).optional(),
+    certificateQuota: z.number().int().min(1).optional(),
+    stripePriceId: z.string().optional(),
+    isActive: z.boolean().optional(),
+  }),
+});
+
 export const createTemplateSchema = z.object({
   body: z.object({
     name: z.string().min(1),

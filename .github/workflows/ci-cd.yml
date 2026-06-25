@@ -127,6 +127,11 @@ jobs:
           SPARKPOST_API_KEY=${{ secrets.SPARKPOST_API_KEY }}
           EMAIL_FROM=${{ vars.EMAIL_FROM }}
           EMAIL_FROM_NAME=${{ vars.EMAIL_FROM_NAME }}
+
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+
           EOF
 
       # Copy the compose file and generated .env to the VPS.

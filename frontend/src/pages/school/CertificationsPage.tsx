@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Award, Eye, Send, FileCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Award, Eye, Send, FileCheck, AlertTriangle } from 'lucide-react';
 import { PageHeader, Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Table, Th, Td, Badge, Spinner } from '@/components/ui/misc';
@@ -9,11 +10,13 @@ import {
   useGenerateDiplomasMutation,
   usePublishDiplomasMutation,
   useLazyPreviewDiplomaQuery,
+  useGetMySubscriptionQuery,
 } from '@/store/api';
 import { Diploma } from '@/types';
 
 export default function CertificationsPage() {
   const { data: students, isLoading } = useGetCertifiableQuery({});
+  const { data: subscription } = useGetMySubscriptionQuery();
   const [generate, genState] = useGenerateDiplomasMutation();
   const [publish, pubState] = usePublishDiplomasMutation();
   const [triggerPreview, previewState] = useLazyPreviewDiplomaQuery();
@@ -24,6 +27,9 @@ export default function CertificationsPage() {
   const [previewHtml, setPreviewHtml] = useState('');
 
   const items = students ?? [];
+  const hasPlan = Boolean(subscription?.plan);
+  const remaining = subscription?.remaining ?? 0;
+  const overQuota = hasPlan && selected.length > remaining;
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const toggleAll = () => setSelected(selected.length === items.length ? [] : items.map((s) => s._id));
 
@@ -67,7 +73,11 @@ export default function CertificationsPage() {
         description="Sélectionnez les étudiants admis, générez puis publiez leurs diplômes."
         actions={
           <>
-            <Button variant="outline" onClick={onGenerate} disabled={!selected.length || genState.isLoading}>
+            <Button
+              variant="outline"
+              onClick={onGenerate}
+              disabled={!selected.length || genState.isLoading || !hasPlan || overQuota}
+            >
               <Award className="h-4 w-4" /> Générer
             </Button>
             <Button variant="accent" onClick={onPublish} disabled={!generated.length || pubState.isLoading}>
@@ -76,6 +86,29 @@ export default function CertificationsPage() {
           </>
         }
       />
+
+      {!hasPlan ? (
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <AlertTriangle className="h-4 w-4" />
+          Aucun abonnement actif.{' '}
+          <Link to="/app/subscription" className="font-medium underline">
+            Souscrivez à une formule
+          </Link>{' '}
+          pour générer des certificats.
+        </div>
+      ) : (
+        <div className="mb-4 flex items-center justify-between gap-2 rounded-md border border-brand/20 bg-brand/5 px-4 py-3 text-sm">
+          <span>
+            Quota : <strong>{remaining}</strong> certificat(s) restant(s) cette
+            période ({subscription?.used ?? 0}/{subscription?.quota ?? 0} utilisés).
+          </span>
+          {overQuota && (
+            <span className="font-medium text-destructive">
+              Sélection ({selected.length}) supérieure au quota restant.
+            </span>
+          )}
+        </div>
+      )}
 
       {generated.length > 0 && (
         <div className="mb-4 flex items-center gap-2 rounded-md border border-brand/20 bg-brand/5 px-4 py-3 text-sm">
