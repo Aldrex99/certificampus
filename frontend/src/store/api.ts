@@ -10,6 +10,7 @@ import {
   Plan,
   School,
   SchoolDashboard,
+  Speciality,
   Student,
   Subscription,
   TemplateDiploma,
@@ -48,7 +49,7 @@ const baseQuery: BaseQueryFn<string | AxiosQueryArgs, unknown, unknown> = async 
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['Student', 'Training', 'Certifiable', 'School', 'Subscription', 'Plan', 'Billing', 'Template', 'Dashboard', 'Profile'],
+  tagTypes: ['Student', 'Training', 'Speciality', 'Certifiable', 'School', 'Subscription', 'Plan', 'Billing', 'Template', 'Dashboard', 'Profile'],
   endpoints: (builder) => ({
     /* ----------------------------- Auth ----------------------------- */
     login: builder.mutation<{ user: AuthUser }, { email: string; password: string }>({
@@ -125,6 +126,25 @@ export const api = createApi({
     deleteTraining: builder.mutation<void, string>({
       query: (id) => ({ url: `/trainings/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Training'],
+    }),
+
+    /* --------------------------- Specialities ----------------------- */
+    getSpecialities: builder.query<Paginated<Speciality>, { page?: number; search?: string }>({
+      query: (params) => ({ url: '/specialities', params }),
+      transformResponse: unwrap,
+      providesTags: ['Speciality'],
+    }),
+    createSpeciality: builder.mutation<Speciality, Partial<Speciality>>({
+      query: (body) => ({ url: '/specialities', method: 'POST', body }),
+      invalidatesTags: ['Speciality'],
+    }),
+    updateSpeciality: builder.mutation<Speciality, { id: string; body: Partial<Speciality> }>({
+      query: ({ id, body }) => ({ url: `/specialities/${id}`, method: 'PUT', body }),
+      invalidatesTags: ['Speciality'],
+    }),
+    deleteSpeciality: builder.mutation<void, string>({
+      query: (id) => ({ url: `/specialities/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Speciality', 'Training', 'Student'],
     }),
 
     /* -------------------------- Certifications ---------------------- */
@@ -274,6 +294,10 @@ export const {
   useCreateTrainingMutation,
   useUpdateTrainingMutation,
   useDeleteTrainingMutation,
+  useGetSpecialitiesQuery,
+  useCreateSpecialityMutation,
+  useUpdateSpecialityMutation,
+  useDeleteSpecialityMutation,
   useGetCertifiableQuery,
   usePreviewDiplomaQuery,
   useLazyPreviewDiplomaQuery,
