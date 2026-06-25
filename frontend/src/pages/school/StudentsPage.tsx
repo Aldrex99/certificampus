@@ -24,12 +24,16 @@ const empty = {
   status: "ajourne",
   grade: "",
   training: "",
+  speciality: "",
   graduationDate: "",
 };
 
 /** Reads a student's training id, whether populated or a raw id. */
 const trainingId = (t: Student["training"]): string =>
   typeof t === "string" ? t : (t?._id ?? "");
+
+const specialityId = (s: Student["speciality"]): string =>
+  typeof s === "string" ? s : (s?._id ?? "");
 
 const dateInput = (iso?: string): string => (iso ? iso.slice(0, 10) : "");
 
@@ -75,6 +79,7 @@ export default function StudentsPage() {
       status: s.status,
       grade: s.grade ?? "",
       training: trainingId(s.training),
+      speciality: specialityId(s.speciality),
       graduationDate: dateInput(s.graduationDate),
     });
     setModalOpen(true);
@@ -85,6 +90,7 @@ export default function StudentsPage() {
     const body = {
       ...form,
       training: form.training || null,
+      speciality: form.speciality || null,
       graduationDate: form.graduationDate || null,
     } as unknown as Partial<Student>;
     try {
@@ -376,7 +382,9 @@ export default function StudentsPage() {
             <Label>Formation</Label>
             <Select
               value={form.training}
-              onChange={(e) => setForm({ ...form, training: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, training: e.target.value, speciality: "" })
+              }
             >
               <option value="">Aucune formation</option>
               {trainings?.items.map((t) => (
@@ -386,6 +394,30 @@ export default function StudentsPage() {
               ))}
             </Select>
           </div>
+          {(() => {
+            const specialities = trainings?.items.find(
+              (t) => t._id === form.training
+            )?.specialities;
+            if (!specialities?.length) return null;
+            return (
+              <div className="space-y-1.5">
+                <Label>Spécialité</Label>
+                <Select
+                  value={form.speciality}
+                  onChange={(e) =>
+                    setForm({ ...form, speciality: e.target.value })
+                  }
+                >
+                  <option value="">Aucune spécialité</option>
+                  {specialities.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            );
+          })()}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Statut</Label>
