@@ -4,6 +4,8 @@ export const createSpecialitySchema = z.object({
   body: z.object({
     label: z.string().min(1, "Libellé requis"),
     description: z.string().optional(),
+    // Optional formation this speciality is attached to ("" / omitted = none).
+    training: z.string().optional(),
   }),
 });
 
@@ -11,6 +13,7 @@ export const updateSpecialitySchema = z.object({
   body: z.object({
     label: z.string().min(1).optional(),
     description: z.string().optional(),
+    training: z.string().optional(),
   }),
 });
 
